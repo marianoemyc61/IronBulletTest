@@ -5,8 +5,9 @@ edition = "2021"
 description = "Pipelined request automation & script builder"
 
 [dependencies]
-tao = "0.34.5"
-wry = "0.54.1"
+axum = { version = "0.7", features = ["ws"] }
+tower-http = { version = "0.5", features = ["fs", "cors", "trace"] }
+axum-extra = { version = "0.9", features = ["typed-header"] }
 rfd = "0.17.2"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"

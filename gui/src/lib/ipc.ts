@@ -28,6 +28,63 @@ const PANEL_ALLOWED_CMDS = new Set([
 	'inspect_browser_close',
 ]);
 
+let ws: WebSocket | null = null;
+let wsReady = false;
+let messageQueue: string[] = [];
+
+// Initialize WebSocket
+if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = window.location.host || 'localhost:3000';
+    ws = new WebSocket(`${protocol}//${host}/ws`);
+
+    ws.onopen = () => {
+        console.log('[IPC] WebSocket connected');
+        wsReady = true;
+        // Flush queue
+        while (messageQueue.length > 0) {
+            const msg = messageQueue.shift();
+            if (msg) ws!.send(msg);
+        }
+    };
+
+    ws.onclose = () => {
+        console.log('[IPC] WebSocket disconnected');
+        wsReady = false;
+    };
+
+    ws.onerror = (err) => {
+        console.error('[IPC] WebSocket error:', err);
+    };
+
+    ws.onmessage = (event) => {
+        const raw = event.data;
+        // Previously wry sent strings like "window.__ipc_callback({cmd:..., success:...})"
+        // We'll parse it here safely.
+        if (typeof raw === 'string') {
+            if (raw.startsWith('window.__ipc_callback(')) {
+                try {
+                    const jsonStr = raw.substring('window.__ipc_callback('.length, raw.length - 1);
+                    const parsed = JSON.parse(jsonStr);
+                    if (typeof (window as any).__ipc_callback === 'function') {
+                        (window as any).__ipc_callback(parsed);
+                    }
+                } catch (e) {
+                    console.error('[IPC] Raw message parse error:', e, raw);
+                }
+            } else if (raw.startsWith('if (window.__ibPanelOpened)')) {
+                // Ignore native float panel logic since we moved to web.
+            } else if (raw.startsWith('if (window.__ibPanelClosed)')) {
+                // Ignore native float panel logic
+            } else if (raw === "window.dispatchEvent(new Event('native-close-requested'))") {
+                window.dispatchEvent(new Event('native-close-requested'));
+            } else {
+                console.warn('[IPC] Unrecognized raw message:', raw);
+            }
+        }
+    };
+}
+
 export function send(cmd: string, data: Record<string, unknown> = {}) {
 	// In native panel windows this webview is receive-only.
 	// Sending IPC from panel windows causes Rust to broadcast responses to ALL
@@ -50,7 +107,13 @@ export function send(cmd: string, data: Record<string, unknown> = {}) {
 		}
 		console.log(`[IPC] → ${cmd}`, logData);
 	}
-	window.ipc.postMessage(JSON.stringify({ cmd, data: payload }));
+
+    const msgString = JSON.stringify({ cmd, data: payload });
+    if (wsReady && ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(msgString);
+    } else {
+        messageQueue.push(msgString);
+    }
 }
 
 export function saveSettings() {
