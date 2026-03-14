@@ -1,0 +1,82 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger release when pushing a tag like v1.0.0
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            bin_name: ironbullet
+            release_name: ironbullet-linux
+          - os: windows-latest
+            bin_name: ironbullet.exe
+            release_name: ironbullet-windows.exe
+
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Use Rust stable
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Install Linux dependencies
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y pkg-config libglib2.0-dev libgtk-3-dev libappindicator3-dev librsvg2-dev patchelf libwayland-dev libxkbcommon-dev libx11-dev
+
+    - name: Install Frontend Dependencies
+      working-directory: ./gui
+      run: npm install
+
+    - name: Build Frontend
+      working-directory: ./gui
+      run: npm run build
+
+    - name: Build Cargo Project
+      run: cargo build --release
+
+    - name: Rename binary for release
+      shell: bash
+      run: mv target/release/${{ matrix.bin_name }} ${{ matrix.release_name }}
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.release_name }}
+        path: ${{ matrix.release_name }}
+
+  publish-release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+        merge-multiple: true
+
+    - name: Publish Release to GitHub
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          artifacts/ironbullet-linux
+          artifacts/ironbullet-windows.exe
+        generate_release_notes: true
