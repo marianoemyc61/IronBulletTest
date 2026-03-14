@@ -356,7 +356,7 @@ pub fn evaluate_json_path(root: &serde_json::Value, path: &str) -> String {
         return json_value_to_string(root);
     } else if let Some(rest) = path.strip_prefix("$.") {
         rest
-    } else if let Some(rest) = path.strip_prefix("$[") {
+    } else if let Some(_rest) = path.strip_prefix("$[") {
         // e.g. `$[0]` or `$[*]` — re-attach the `[`
         // We need to keep the leading bracket so the tokeniser handles it
         &path[1..] // strip just the `$`
@@ -476,7 +476,7 @@ fn parse_filter_expr(expr: &str) -> Option<FilterExpr> {
         (">",  FilterOp::Gt),
         ("<",  FilterOp::Lt),
     ];
-    for (sym, op) in ops {
+    for (sym, _op) in ops {
         if let Some(pos) = rest.find(sym) {
             let field = rest[..pos].trim().to_string();
             let raw_rhs = rest[pos + sym.len()..].trim();

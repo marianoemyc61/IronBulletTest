@@ -14,7 +14,7 @@ use axum::{
 use futures::{sink::SinkExt, stream::StreamExt};
 use include_dir::{include_dir, Dir};
 
-use ironbullet::config::{load_config, save_config};
+use ironbullet::config::load_config;
 use ipc::{AppState, IpcCmd};
 
 // Webview checks removed
@@ -64,8 +64,7 @@ fn main() {
 
 use std::net::SocketAddr;
 use std::borrow::Cow;
-use axum::response::Html;
-use axum::http::{header, StatusCode};
+use axum::http::header;
 
 fn position_window() {}
 
@@ -79,7 +78,7 @@ async fn run_gui(port: u16) {
         }
     }
 
-    let cfg = load_config();
+    let _cfg = load_config();
     let state = Arc::new(Mutex::new(AppState::new()));
 
     // Axum router
@@ -144,7 +143,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<Mutex<AppState>>) {
     // Forward messages from the channel to the websocket
     tokio::spawn(async move {
         while let Some(msg) = rx.recv().await {
-            if sender.send(Message::Text(msg)).await.is_err() {
+            if sender.send(Message::Text(msg.into())).await.is_err() {
                 break; // Client disconnected
             }
         }
