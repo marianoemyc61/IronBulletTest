@@ -27,7 +27,12 @@ pub struct CliArgs {
     pub debug: bool,
 }
 
-pub fn parse_args(args: &[String]) -> Result<CliArgs, String> {
+pub enum AppMode {
+    Cli(CliArgs),
+    Server(u16),
+}
+
+pub fn parse_args(args: &[String]) -> Result<AppMode, String> {
     let mut config = None;
     let mut wordlist = None;
     let mut threads = None;
@@ -36,6 +41,9 @@ pub fn parse_args(args: &[String]) -> Result<CliArgs, String> {
     let mut skip = None;
     let mut take = None;
     let mut debug = false;
+    let mut port = 3000;
+    
+    let mut is_cli = false;
 
     let mut i = 0;
     while i < args.len() {
@@ -43,6 +51,7 @@ pub fn parse_args(args: &[String]) -> Result<CliArgs, String> {
             "--config" | "-c" => {
                 i += 1;
                 config = Some(args.get(i).ok_or("--config requires a path")?.clone());
+                is_cli = true;
             }
             "--wordlist" | "-w" => {
                 i += 1;
@@ -71,6 +80,11 @@ pub fn parse_args(args: &[String]) -> Result<CliArgs, String> {
                 let val = args.get(i).ok_or("--take requires a number")?;
                 take = Some(val.parse::<u32>().map_err(|_| format!("invalid take value: {}", val))?);
             }
+            "--port" => {
+                i += 1;
+                let val = args.get(i).ok_or("--port requires a number")?;
+                port = val.parse::<u16>().map_err(|_| format!("invalid port number: {}", val))?;
+            }
             "--debug" | "-d" => {
                 debug = true;
             }
@@ -85,16 +99,20 @@ pub fn parse_args(args: &[String]) -> Result<CliArgs, String> {
         i += 1;
     }
 
-    Ok(CliArgs {
-        config: config.ok_or("--config is required")?,
-        wordlist: wordlist.ok_or("--wordlist is required")?,
-        threads,
-        proxies,
-        outfile,
-        skip,
-        take,
-        debug,
-    })
+    if is_cli {
+        Ok(AppMode::Cli(CliArgs {
+            config: config.ok_or("--config is required")?,
+            wordlist: wordlist.ok_or("--wordlist is required")?,
+            threads,
+            proxies,
+            outfile,
+            skip,
+            take,
+            debug,
+        }))
+    } else {
+        Ok(AppMode::Server(port))
+    }
 }
 
 fn print_help() {
@@ -111,6 +129,7 @@ OPTIONS:
   -o, --outfile <dir>     Output directory for hits (default: results/)
       --skip <n>          Skip first N data lines
       --take <n>          Process only N data lines (0 = all)
+      --port <n>          Port to use for GUI mode (default: 3000)
   -d, --debug             Print each block result to stderr
   -h, --help              Show this help");
 }

@@ -1,4 +1,4 @@
-#![windows_subsystem = "windows"]
+
 
 mod ipc;
 
@@ -39,52 +39,27 @@ fn mime_for(path: &str) -> &'static str {
 
 // Evt enum removed
 
-/// Check if we should run in CLI mode (any --config or --help arg present)
-fn is_cli_mode() -> bool {
-    std::env::args().any(|a| a == "--config" || a == "-c" || a == "--help" || a == "-h")
-}
-
-/// Attach to parent console on Windows so CLI output is visible.
-/// Required because #![windows_subsystem = "windows"] hides the console.
-#[cfg(target_os = "windows")]
-fn attach_console() {
-    unsafe {
-        windows_sys::Win32::System::Console::AttachConsole(
-            windows_sys::Win32::System::Console::ATTACH_PARENT_PROCESS,
-        );
-    }
-}
-
-#[cfg(not(target_os = "windows"))]
-fn attach_console() {}
-
 fn main() {
-    if is_cli_mode() {
-        attach_console();
-        run_cli();
-    } else {
-        run_gui();
-    }
-}
-
-fn run_cli() {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    let cli = match ironbullet::cli::parse_args(&args) {
-        Ok(c) => c,
+    match ironbullet::cli::parse_args(&args) {
+        Ok(ironbullet::cli::AppMode::Cli(cli)) => {
+            let rt = tokio::runtime::Runtime::new().expect("Failed to create tokio runtime");
+            rt.block_on(async {
+                if let Err(e) = ironbullet::cli::run(cli).await {
+                    eprintln!("error: {}", e);
+                    std::process::exit(1);
+                }
+            });
+        }
+        Ok(ironbullet::cli::AppMode::Server(port)) => {
+            run_gui(port);
+        }
         Err(e) => {
             eprintln!("error: {}", e);
             eprintln!("run with --help for usage");
             std::process::exit(1);
         }
-    };
-
-    let rt = tokio::runtime::Runtime::new().expect("Failed to create tokio runtime");
-    rt.block_on(async {
-        if let Err(e) = ironbullet::cli::run(cli).await {
-            eprintln!("error: {}", e);
-            std::process::exit(1);
-        }
-    });
+    }
 }
 
 use std::net::SocketAddr;
@@ -95,7 +70,7 @@ use axum::http::{header, StatusCode};
 fn position_window() {}
 
 #[tokio::main]
-async fn run_gui() {
+async fn run_gui(port: u16) {
     // Clean up old binary from previous update
     if let Ok(exe) = std::env::current_exe() {
         let old = exe.with_extension("old.exe");
@@ -113,8 +88,16 @@ async fn run_gui() {
         .fallback(get(serve_gui))
         .with_state(state.clone());
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
-    println!("Server running at http://{}", addr);
+    let addr = SocketAddr::from(([127, 0, 0, 1], port));
+    println!(r#"
+  _____                 ____        _ _      _   
+ |_   _|               |  _ \      | | |    | |  
+   | |  _ __ ___  _ __ | |_) |_   _| | | ___| |_ 
+   | | | '__/ _ \| '_ \|  _ <| | | | | |/ _ \ __|
+  _| |_| | | (_) | | | | |_) | |_| | | |  __/ |_ 
+ |_____|_|  \___/|_| |_|____/ \__,_|_|_|\___|\__|
+"#);
+    println!("Server running at http://{addr}");
 
     // Open browser on startup
     let url = format!("http://{}", addr);
