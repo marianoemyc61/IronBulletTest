@@ -4,9 +4,6 @@ mod ipc;
 
 use std::sync::Arc;
 use tokio::sync::Mutex;
-
-use std::sync::Arc;
-use tokio::sync::Mutex;
 use axum::{
     extract::ws::{Message, WebSocket, WebSocketUpgrade},
     extract::State,
@@ -141,7 +138,7 @@ async fn serve_gui(req: axum::extract::Request) -> impl IntoResponse {
         Some(f) => (Cow::Borrowed(f.contents()), mime_for(path)),
         None => match GUI_DIR.get_file("index.html") {
             Some(f) => (Cow::Borrowed(f.contents()), "text/html"),
-            None => (Cow::Borrowed(b"404 Not Found"), "text/plain"),
+            None => (Cow::Borrowed(b"404 Not Found".as_ref()), "text/plain"),
         },
     };
 
