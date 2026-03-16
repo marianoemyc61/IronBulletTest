@@ -108,13 +108,7 @@ func handleNewSession(req SidecarRequest) {
 		}
 	}
 
-	// Pre-initialize the transport so the first Do() doesn't pay the lazy-init
-	// cost inline. InitTransport is idempotent; calling it here moves the cost
-	// to session setup time and keeps request latency predictable.
-	if err := session.InitTransport(browser); err != nil {
-		// Non-fatal — the transport will self-initialize on first request.
-		fmt.Fprintf(os.Stderr, "[sidecar] InitTransport warning: %v\n", err)
-	}
+
 
 	sessionsMu.Lock()
 	sessions[req.Session] = &SessionWrapper{

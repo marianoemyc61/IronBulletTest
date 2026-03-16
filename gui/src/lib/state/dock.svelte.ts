@@ -4,7 +4,7 @@
  * Layout is persisted to localStorage.
  */
 
-export type PanelId = 'debugger' | 'code' | 'data' | 'jobs' | 'network' | 'variables' | 'inspector' | 'toolkit';
+export type PanelId = 'debugger' | 'code' | 'data' | 'jobs' | 'variables' | 'inspector' | 'toolkit';
 /** Dock zones:
  * - bottom / right / left: docked tab areas in the main window
  * - float:   CSS overlay (legacy, kept for non-Windows)
@@ -33,7 +33,6 @@ export const PANEL_LABELS: Record<PanelId, string> = {
 	code: 'Code View',
 	data: 'Data / Proxy',
 	jobs: 'Jobs',
-	network: 'Network',
 	variables: 'Variables',
 	toolkit: 'Toolkit',
 };
@@ -45,7 +44,6 @@ export const PANEL_ICONS: Record<PanelId, string> = {
 	code:       'file-code',
 	data:       'database',
 	jobs:       'cpu',
-	network:    'globe',
 	variables:  'braces',
 	toolkit:    'wrench',
 };
@@ -57,10 +55,9 @@ const DEFAULT_PANELS: PanelConfig[] = [
 	{ id: 'code',     zone: 'bottom', order: 1 },
 	{ id: 'data',     zone: 'bottom', order: 2 },
 	{ id: 'jobs',     zone: 'bottom', order: 3 },
-	{ id: 'network',  zone: 'bottom', order: 4 },
-	{ id: 'variables', zone: 'bottom', order: 5 },
-	{ id: 'inspector', zone: 'bottom', order: 6 },
-	{ id: 'toolkit',   zone: 'bottom', order: 7 },
+	{ id: 'variables', zone: 'bottom', order: 4 },
+	{ id: 'inspector', zone: 'bottom', order: 5 },
+	{ id: 'toolkit',   zone: 'bottom', order: 6 },
 ];
 
 function loadFromStorage(): PanelConfig[] {

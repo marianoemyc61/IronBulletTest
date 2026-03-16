@@ -18,7 +18,6 @@
 	import VariableInspector from '$lib/components/VariableInspector.svelte';
 	import DebugPanel from '$lib/components/DebugPanel.svelte';
 	import CodeView from '$lib/components/CodeView.svelte';
-	import NetworkViewer from '$lib/components/NetworkViewer.svelte';
 	import DataPanel from '$lib/components/DataPanel.svelte';
 	import ResponseViewer from '$lib/components/ResponseViewer.svelte';
 	import JobMonitor from '$lib/components/JobMonitor.svelte';
@@ -180,7 +179,6 @@
 		{:else if nativePanelId === 'code'}<CodeView />
 		{:else if nativePanelId === 'data'}<DataPanel />
 		{:else if nativePanelId === 'jobs'}<div class="h-full overflow-y-auto"><JobMonitor /></div>
-		{:else if nativePanelId === 'network'}<div class="h-full overflow-y-auto"><NetworkViewer /></div>
 		{:else if nativePanelId === 'variables'}<div class="h-full overflow-y-auto"><VariableInspector /></div>
 		{:else if nativePanelId === 'response-viewer'}<ResponseViewer nativeMode={true} />
 		{:else if nativePanelId === 'inspector'}<SiteInspector />
@@ -238,7 +236,6 @@
 									{:else if id === 'code'}<CodeView />
 									{:else if id === 'data'}<DataPanel />
 									{:else if id === 'jobs'}<div class="overflow-y-auto h-full"><JobMonitor /></div>
-									{:else if id === 'network'}<div class="overflow-y-auto h-full"><NetworkViewer /></div>
 									{:else if id === 'variables'}<div class="overflow-y-auto h-full"><VariableInspector /></div>
 									{:else if id === 'inspector'}<div class="h-full"><SiteInspector /></div>
 									{:else if id === 'toolkit'}<div class="h-full overflow-hidden"><ToolkitPanel /></div>
@@ -294,7 +291,6 @@
 										{:else if id === 'code'}<CodeView />
 										{:else if id === 'data'}<DataPanel />
 										{:else if id === 'jobs'}<div class="overflow-y-auto h-full"><JobMonitor /></div>
-										{:else if id === 'network'}<div class="overflow-y-auto h-full"><NetworkViewer /></div>
 										{:else if id === 'variables'}<div class="overflow-y-auto h-full"><VariableInspector /></div>
 									{:else if id === 'inspector'}<div class="h-full"><SiteInspector /></div>
 									{:else if id === 'toolkit'}<div class="h-full overflow-hidden"><ToolkitPanel /></div>
@@ -327,7 +323,6 @@
 								{:else if id === 'code'}<CodeView />
 								{:else if id === 'data'}<DataPanel />
 								{:else if id === 'jobs'}<div class="overflow-y-auto h-full"><JobMonitor /></div>
-								{:else if id === 'network'}<div class="overflow-y-auto h-full"><NetworkViewer /></div>
 								{:else if id === 'variables'}<div class="overflow-y-auto h-full"><VariableInspector /></div>
 									{:else if id === 'inspector'}<div class="h-full"><SiteInspector /></div>
 									{:else if id === 'toolkit'}<div class="h-full overflow-hidden"><ToolkitPanel /></div>

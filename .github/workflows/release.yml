@@ -17,11 +17,11 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            bin_name: ironbullet
-            release_name: ironbullet-linux
+            bin_name: IronBullet
+            release_name: IronBullet-linux
           - os: windows-latest
-            bin_name: ironbullet.exe
-            release_name: ironbullet-windows.exe
+            bin_name: IronBullet.exe
+            release_name: IronBullet-windows.exe
 
     steps:
     - name: Checkout source code
@@ -77,6 +77,6 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         files: |
-          artifacts/ironbullet-linux
-          artifacts/ironbullet-windows.exe
+          artifacts/IronBullet-linux
+          artifacts/IronBullet-windows.exe
         generate_release_notes: true
