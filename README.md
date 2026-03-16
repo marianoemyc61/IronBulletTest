@@ -28,7 +28,6 @@ IronBullet is a desktop automation toolkit built around a visual, drag-and-drop 
 |  **Multi-threaded jobs** | Configurable thread pools, proxy rotation, ban detection, gradual ramp-up |
 |  **Intellisense** | Context-aware autocomplete in all input fields — variables, headers, delimiters, response body predictions |
 |  **TLS fingerprinting** | AzureTLS, RustTLS, and WreqTLS backends with per-block JA3/HTTP2 fingerprint control |
-|  **MITM capture** | Built-in proxy captures browser traffic for Site Inspector — export as JSON/HAR |
 |  **Code export** | Export any pipeline as standalone Rust source code |
 |  **Plugin system** | Hot-loadable plugins extend the block palette without recompiling |
 |  **OB2 import** | Import OpenBullet 2 / SilverBullet configs (.svb, .opk, .loliScript) |

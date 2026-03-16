@@ -36,10 +36,6 @@ pub struct SidecarRequest {
     /// e.g. "4865-4866-4867-49195-49199-49196-49200"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub custom_ciphers: Option<String>,
-    /// When true the sidecar captures and returns the actual headers sent on the wire.
-    /// Used by the Site Inspector panel.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub return_request_headers: Option<bool>,
     /// When true, skip TLS verification when connecting through an HTTPS proxy.
     /// Equivalent to `curl --proxy-insecure`. AzureTLS handles this automatically;
     /// for RustTLS/WreqTLS this also disables target TLS verification.
@@ -73,7 +69,6 @@ impl Default for SidecarRequest {
             max_redirects: None,
             ssl_verify: None,
             custom_ciphers: None,
-            return_request_headers: None,
             proxy_insecure: None,
         }
     }
@@ -88,9 +83,6 @@ pub struct SidecarResponse {
     pub status: i32,
     #[serde(default)]
     pub headers: Option<HashMap<String, String>>,
-    /// Headers actually sent by azuretls (only populated when return_request_headers was true)
-    #[serde(default)]
-    pub request_headers: Option<HashMap<String, String>>,
     #[serde(default)]
     pub body: String,
     #[serde(default)]

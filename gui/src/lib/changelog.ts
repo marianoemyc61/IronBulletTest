@@ -94,7 +94,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 					'UI & Panels settings section — new settings page with controls for dialog suppression, panel visibility, and density.',
 					'Skip unsaved dialog — option to close tabs immediately without the "save changes?" prompt.',
 					'Skip app close confirm — option to exit the app immediately even with unsaved tabs.',
-					'Bottom panel tab visibility — show/hide individual tabs (Debugger, Code View, Data/Proxy, Jobs, Network, Variables, Inspector) from settings. State persists across restarts.',
+					'Bottom panel tab visibility — show/hide individual tabs (Debugger, Code View, Data/Proxy, Jobs, Network, Variables) from settings. State persists across restarts.',
 					'Compact mode setting — reduces spacing in block list and panels.',
 					'Reset panel layout button in settings.',
 				],

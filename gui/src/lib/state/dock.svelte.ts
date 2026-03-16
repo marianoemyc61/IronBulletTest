@@ -4,7 +4,7 @@
  * Layout is persisted to localStorage.
  */
 
-export type PanelId = 'debugger' | 'code' | 'data' | 'jobs' | 'variables' | 'inspector' | 'toolkit';
+export type PanelId = 'debugger' | 'code' | 'data' | 'jobs' | 'variables' | 'toolkit';
 /** Dock zones:
  * - bottom / right / left: docked tab areas in the main window
  * - float:   CSS overlay (legacy, kept for non-Windows)
@@ -28,7 +28,6 @@ export interface PanelConfig {
 }
 
 export const PANEL_LABELS: Record<PanelId, string> = {
-	inspector: 'Inspect',
 	debugger: 'Debugger',
 	code: 'Code View',
 	data: 'Data / Proxy',
@@ -39,7 +38,6 @@ export const PANEL_LABELS: Record<PanelId, string> = {
 
 // Lucide icon names for each panel tab (imported by DockZoneTabs)
 export const PANEL_ICONS: Record<PanelId, string> = {
-	inspector:  'search',
 	debugger:   'bug',
 	code:       'file-code',
 	data:       'database',
@@ -56,8 +54,7 @@ const DEFAULT_PANELS: PanelConfig[] = [
 	{ id: 'data',     zone: 'bottom', order: 2 },
 	{ id: 'jobs',     zone: 'bottom', order: 3 },
 	{ id: 'variables', zone: 'bottom', order: 4 },
-	{ id: 'inspector', zone: 'bottom', order: 5 },
-	{ id: 'toolkit',   zone: 'bottom', order: 6 },
+	{ id: 'toolkit',   zone: 'bottom', order: 5 },
 ];
 
 function loadFromStorage(): PanelConfig[] {

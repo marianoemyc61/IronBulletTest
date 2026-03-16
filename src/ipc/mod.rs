@@ -6,7 +6,6 @@ mod handlers_job;
 mod handlers_plugin;
 mod handlers_runner;
 mod handlers_update;
-pub mod browser_proxy;
 
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -71,18 +70,6 @@ pub struct AppState {
     pub hits: Vec<HitResult>,
     pub job_manager: JobManager,
     pub plugin_manager: Arc<PluginManager>,
-    /// Abort handle for the active browser-capture task (Inspector panel).
-    pub browser_capture_abort: Option<tokio::task::AbortHandle>,
-    /// Temp user-data-dir used by the current Chrome capture session.
-    /// Cleaned up when the session ends or a new one starts, preventing
-    /// Chrome from finding a locked profile from a zombie prior instance.
-    pub browser_capture_profile: Option<std::path::PathBuf>,
-    /// Abort handle for the local HTTP proxy capture server (Inspector panel).
-    pub inspect_proxy_abort: Option<tokio::task::AbortHandle>,
-    /// Port the proxy capture server is listening on.
-    pub inspect_proxy_port: Option<u16>,
-    /// Ephemeral MITM CA — generated once per process, reused for all sessions.
-    pub mitm_ca: Option<Arc<crate::ipc::browser_proxy::MitmCa>>,
 }
 
 impl AppState {
@@ -109,11 +96,6 @@ impl AppState {
             hits: Vec::new(),
             job_manager: JobManager::new(),
             plugin_manager: Arc::new(pm),
-            browser_capture_abort: None,
-            browser_capture_profile: None,
-            inspect_proxy_abort: None,
-            inspect_proxy_port: None,
-            mitm_ca: None,
         }
     }
 }
@@ -300,26 +282,6 @@ pub fn handle_ipc_cmd(
             handlers_runner::probe_url(data, eval_js);
             None
         }
-        "site_inspect" => {
-            handlers_runner::site_inspect(state, data, eval_js);
-            None
-        }
-        "inspect_browser_open" => {
-            handlers_runner::inspect_browser_open(state, data, eval_js);
-            None
-        }
-        "inspect_browser_close" => {
-            handlers_runner::inspect_browser_close(state, eval_js);
-            None
-        }
-        "inspect_proxy_start" => {
-            handlers_runner::inspect_proxy_start(state, data, eval_js);
-            None
-        }
-        "inspect_proxy_stop" => {
-            handlers_runner::inspect_proxy_stop(state, eval_js);
-            None
-        }
 
         "create_job" => {
             handlers_job::create_job(state, data, eval_js);
@@ -463,78 +425,6 @@ pub fn handle_ipc_cmd(
             let resp = IpcResponse::ok("check_chrome", serde_json::json!({ "found": found, "path": path }));
             let js = format!("window.__ipc_callback({})", serde_json::to_string(&resp).unwrap_or_default());
             eval_js(js);
-            None
-        }
-
-        // Inspector: apply captured request to an HTTP block from a detached panel window.
-        // The panel can't mutate the main window's pipeline directly, so it sends this IPC.
-        "inspector_apply_to_block" => {
-            let block_id = data.get("block_id").and_then(|v| v.as_str()).map(|s| s.to_string());
-            let headers: Vec<(String, String)> = data.get("headers")
-                .and_then(|v| serde_json::from_value(v.clone()).ok())
-                .unwrap_or_default();
-            let url = data.get("url").and_then(|v| v.as_str()).unwrap_or("").to_string();
-            let body = data.get("body").and_then(|v| v.as_str()).map(|s| s.to_string());
-
-            let rt = tokio::runtime::Handle::try_current();
-            if let Ok(handle) = rt {
-                let state2 = state.clone();
-                handle.spawn(async move {
-                    use ironbullet::pipeline::block::BlockSettings;
-                    let mut s = state2.lock().await;
-                    // Find target block ID: prefer the selected block if it's an HttpRequest
-                    let target_id: Option<uuid::Uuid> = {
-                        let by_selection = block_id.as_deref()
-                            .and_then(|id| uuid::Uuid::parse_str(id).ok())
-                            .and_then(|uid| s.pipeline.blocks.iter()
-                                .find(|b| b.id == uid && matches!(b.settings, BlockSettings::HttpRequest(_)))
-                                .map(|b| b.id));
-                        by_selection.or_else(|| s.pipeline.blocks.iter()
-                            .find(|b| matches!(b.settings, BlockSettings::HttpRequest(_)))
-                            .map(|b| b.id))
-                    };
-                    if let Some(tid) = target_id {
-                        for block in s.pipeline.blocks.iter_mut() {
-                            if block.id != tid { continue; }
-                            if let BlockSettings::HttpRequest(ref mut settings) = block.settings {
-                                for (k, v) in &headers {
-                                    if let Some(entry) = settings.headers.iter_mut()
-                                        .find(|(ek, _)| ek.eq_ignore_ascii_case(k))
-                                    {
-                                        entry.1 = v.clone();
-                                    } else {
-                                        settings.headers.push((k.clone(), v.clone()));
-                                    }
-                                }
-                                if !url.is_empty() { settings.url = url.clone(); }
-                                if let Some(ref b) = body { if !b.is_empty() { settings.body = b.clone(); } }
-                            }
-                            break;
-                        }
-                    }
-                });
-            }
-            None
-        }
-
-        // Save inspector transcript to the network/ folder beside the exe
-        "save_inspector_transcript" => {
-            let filename = data.get("filename").and_then(|v| v.as_str()).unwrap_or("transcript.json").to_string();
-            let content  = data.get("content").and_then(|v| v.as_str()).unwrap_or("").to_string();
-            if !filename.is_empty() && !content.is_empty() {
-                let rt = tokio::runtime::Handle::try_current();
-                if let Ok(handle) = rt {
-                    handle.spawn(async move {
-                        let dir = std::env::current_exe()
-                            .ok()
-                            .and_then(|p| p.parent().map(|d| d.join("network")))
-                            .unwrap_or_else(|| std::path::PathBuf::from("network"));
-                        let _ = tokio::fs::create_dir_all(&dir).await;
-                        let path = dir.join(&filename);
-                        let _ = tokio::fs::write(path, content.as_bytes()).await;
-                    });
-                }
-            }
             None
         }
 

@@ -25,7 +25,7 @@ pub(super) fn get_config(
                 issues.push(serde_json::json!({
                     "severity": "Warning",
                     "title": "Chrome / Chromium not found",
-                    "description": "The Site Inspector Browser Capture feature requires Google Chrome or Chromium. Install Chrome from https://www.google.com/chrome/ to use this feature.",
+                    "description": "Chrome automation blocks require Google Chrome or Chromium. Install Chrome from https://www.google.com/chrome/ to use these blocks.",
                     "code_snippet": ""
                 }));
             }
@@ -40,7 +40,7 @@ pub(super) fn get_config(
                 issues.push(serde_json::json!({
                     "severity": "Warning",
                     "title": "reqflow-sidecar not found",
-                    "description": "The AzureTLS sidecar binary (reqflow-sidecar) was not found next to the IronBullet executable. HTTP requests using AzureTLS and Site Inspector manual capture will fall back to native TLS. Re-download the release ZIP to restore it.",
+                    "description": "The AzureTLS sidecar binary (reqflow-sidecar) was not found next to the IronBullet executable. HTTP requests using AzureTLS will fall back to native TLS. Re-download the release ZIP to restore it.",
                     "code_snippet": ""
                 }));
             }

@@ -3,7 +3,7 @@
 	import { dock, PANEL_LABELS } from '$lib/state/dock.svelte';
 	import type { PanelId } from '$lib/state/dock.svelte';
 
-	const ALL_PANEL_IDS: PanelId[] = ['debugger', 'code', 'data', 'jobs', 'network', 'variables', 'inspector'];
+	const ALL_PANEL_IDS: PanelId[] = ['debugger', 'code', 'data', 'jobs', 'network', 'variables'];
 
 	const labelCls = 'text-[10px] font-medium text-muted-foreground uppercase tracking-wide';
 </script>

@@ -6,7 +6,6 @@
 	import type { PanelId } from '$lib/state/dock.svelte';
 	import { createKeydownHandler } from '$lib/keyboard';
 	import DockZoneTabs from '$lib/components/DockZoneTabs.svelte';
-	import TitleBar from '$lib/components/TitleBar.svelte';
 	import ConfigTabBar from '$lib/components/ConfigTabBar.svelte';
 	import Toolbar from '$lib/components/Toolbar.svelte';
 	import ContextMenu from '$lib/components/ContextMenu.svelte';
@@ -25,8 +24,6 @@
 	import UnsavedDialog from '$lib/components/UnsavedDialog.svelte';
 	import UpdateDialog from '$lib/components/UpdateDialog.svelte';
 	import ChangelogDialog from '$lib/components/ChangelogDialog.svelte';
-	import BlockDocsPanel from '$lib/components/BlockDocsPanel.svelte';
-	import SiteInspector from '$lib/components/SiteInspector.svelte';
 	import ToolkitPanel from '$lib/components/ToolkitPanel.svelte';
 	import PluginBuilder from '$lib/components/PluginBuilder.svelte';
 	import Onboarding from '$lib/components/Onboarding.svelte';
@@ -181,7 +178,6 @@
 		{:else if nativePanelId === 'jobs'}<div class="h-full overflow-y-auto"><JobMonitor /></div>
 		{:else if nativePanelId === 'variables'}<div class="h-full overflow-y-auto"><VariableInspector /></div>
 		{:else if nativePanelId === 'response-viewer'}<ResponseViewer nativeMode={true} />
-		{:else if nativePanelId === 'inspector'}<SiteInspector />
 		{:else if nativePanelId === 'toolkit'}<div class="h-full overflow-hidden"><ToolkitPanel /></div>
 		{/if}
 	</div>
@@ -189,10 +185,6 @@
 {:else}
 	<!-- ── Main window layout ── -->
 	<div class="h-screen flex flex-col overflow-hidden">
-		<TitleBar />
-		<!-- Spacer for fixed title bar -->
-		<div class="h-7 shrink-0"></div>
-
 		<!-- Plugin Builder (replaces entire workspace) -->
 		{#if app.showPluginBuilder}
 			<div class="flex-1 overflow-hidden">
@@ -237,7 +229,6 @@
 									{:else if id === 'data'}<DataPanel />
 									{:else if id === 'jobs'}<div class="overflow-y-auto h-full"><JobMonitor /></div>
 									{:else if id === 'variables'}<div class="overflow-y-auto h-full"><VariableInspector /></div>
-									{:else if id === 'inspector'}<div class="h-full"><SiteInspector /></div>
 									{:else if id === 'toolkit'}<div class="h-full overflow-hidden"><ToolkitPanel /></div>
 									{/if}
 								{/snippet}
@@ -292,7 +283,6 @@
 										{:else if id === 'data'}<DataPanel />
 										{:else if id === 'jobs'}<div class="overflow-y-auto h-full"><JobMonitor /></div>
 										{:else if id === 'variables'}<div class="overflow-y-auto h-full"><VariableInspector /></div>
-									{:else if id === 'inspector'}<div class="h-full"><SiteInspector /></div>
 									{:else if id === 'toolkit'}<div class="h-full overflow-hidden"><ToolkitPanel /></div>
 										{/if}
 									{/snippet}
@@ -324,7 +314,6 @@
 								{:else if id === 'data'}<DataPanel />
 								{:else if id === 'jobs'}<div class="overflow-y-auto h-full"><JobMonitor /></div>
 								{:else if id === 'variables'}<div class="overflow-y-auto h-full"><VariableInspector /></div>
-									{:else if id === 'inspector'}<div class="h-full"><SiteInspector /></div>
 									{:else if id === 'toolkit'}<div class="h-full overflow-hidden"><ToolkitPanel /></div>
 								{/if}
 							{/snippet}

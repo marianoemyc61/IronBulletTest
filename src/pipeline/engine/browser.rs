@@ -14,7 +14,7 @@ impl ExecutionContext {
         //
         // Instead: manually spawn Chrome with --remote-debugging-port, poll
         // /json/version over HTTP until it's ready, then connect via
-        // Browser::connect(). This is the same approach used by Site Inspector
+        // Browser::connect(). This is the same approach used by browser automation blocks.
         // and avoids all stderr-reading issues.
         // ----------------------------------------------------------------
 

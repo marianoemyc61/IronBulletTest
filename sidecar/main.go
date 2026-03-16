@@ -31,9 +31,6 @@ type SidecarRequest struct {
 	// e.g. "4865-4866-4867-49195-49199-49196-49200-52393-52392"
 	// Cipher IDs are IANA decimal values. Applied via azuretls JA3 override.
 	CustomCiphers          string     `json:"custom_ciphers,omitempty"`
-	// ReturnRequestHeaders: when true, the response will include the actual request headers
-	// sent by azuretls. Used by the Site Inspector to display the full request.
-	ReturnRequestHeaders   bool       `json:"return_request_headers,omitempty"`
 	// ProxyInsecure: when true, skip TLS verification when connecting through an HTTPS proxy.
 	// AzureTLS already sets InsecureSkipVerify=true on the proxy CONNECT tunnel unconditionally
 	// (in the azuretls library source), so this field is informational only for AzureTLS.
@@ -45,9 +42,6 @@ type SidecarResponse struct {
 	ID             string            `json:"id"`
 	Status         int               `json:"status"`
 	Headers        map[string]string `json:"headers,omitempty"`
-	// RequestHeaders captures the actual HTTP headers sent by azuretls on the wire.
-	// Only populated when ReturnRequestHeaders is true in the request.
-	RequestHeaders map[string]string `json:"request_headers,omitempty"`
 	Body           string            `json:"body"`
 	Cookies        map[string]string `json:"cookies,omitempty"`
 	FinalURL       string            `json:"final_url"`
@@ -116,10 +110,6 @@ func handleRequest(req SidecarRequest) {
 		handleSetProxy(req)
 	case "set_browser":
 		handleSetBrowser(req)
-	case "start_mitm_proxy":
-		sendResponse(handleMitmProxyStart(req))
-	case "stop_mitm_proxy":
-		sendResponse(handleMitmProxyStop(req))
 	case "ping":
 		sendResponse(SidecarResponse{
 			ID:     req.ID,

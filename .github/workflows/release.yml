@@ -17,10 +17,10 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            bin_name: IronBullet
+            bin_name: ironbullet
             release_name: IronBullet-linux
           - os: windows-latest
-            bin_name: IronBullet.exe
+            bin_name: ironbullet.exe
             release_name: IronBullet-windows.exe
 
     steps:
@@ -78,5 +78,5 @@ jobs:
       with:
         files: |
           artifacts/IronBullet-linux
-          artifacts/IronBullet-windows.exe
+          artifacts/IronBullet-windows
         generate_release_notes: true
