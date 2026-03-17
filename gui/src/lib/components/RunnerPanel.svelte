@@ -53,7 +53,11 @@
 	}
 
 	let stats = $derived(app.runnerStats);
-	let progressPct = $derived(stats && stats.total > 0 ? (((stats as any).consumed ?? stats.processed) / stats.total * 100) : 0);
+	// Progress = verified outcomes (hits + fails) only. Errors don't advance progress.
+	// Cap at 99 while actively running — 100 is reserved for when the job is Completed.
+	let progressPct = $derived(stats && stats.total > 0
+		? Math.min(99, ((stats.hits ?? 0) + (stats.fails ?? 0)) / stats.total * 100)
+		: 0);
 </script>
 
 <div class="flex flex-col h-full bg-surface">
